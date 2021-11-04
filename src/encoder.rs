@@ -1,5 +1,7 @@
 #[cfg(feature = "img")]
-use image::DynamicImage;
+use image::{ImageBuffer, Pixel};
+#[cfg(feature = "img")]
+use std::ops::Deref;
 use libwebp_sys::*;
 
 use crate::shared::*;
@@ -21,17 +23,13 @@ impl<'a> Encoder<'a> {
 
     #[cfg(feature = "img")]
     /// Creates a new encoder from the given image.
-    pub fn from_image(image: &'a DynamicImage) -> Result<Self, &str> {
-        match image {
-            DynamicImage::ImageLuma8(_) => { Err("Unimplemented") }
-            DynamicImage::ImageLumaA8(_) => { Err("Unimplemented") }
-            DynamicImage::ImageRgb8(image) => {
-                Ok(Self::from_rgb(image.as_ref(), image.width(), image.height()))
-            }
-            DynamicImage::ImageRgba8(image) => {
-                Ok(Self::from_rgba(image.as_ref(), image.width(), image.height()))
-            }
-            _ => { Err("Unimplemented") }
+    pub fn from_image<P, Container>(image: &'a ImageBuffer<P, Container>) -> Result<Self, &str>
+    where P: Pixel<Subpixel = u8> + 'static,
+    Container: Deref<Target = [P::Subpixel]> {
+        match P::CHANNEL_COUNT {
+            3 => Ok(Self::from_rgb(image.as_ref(), image.width(), image.height())),
+            4 => Ok(Self::from_rgba(image.as_ref(), image.width(), image.height())),
+            _ => Err("Unimplemented")
         }
     }
 
