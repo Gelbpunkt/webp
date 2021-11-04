@@ -16,7 +16,7 @@ categories = ["external-ffi-bindings"]
 
 [dependencies]
 libwebp-sys = "0.2.0"
-image = { version = "^0.23.13", default-features = false, optional = true }
+image = { git = "https://github.com/image-rs/image.git", branch = "master", default-features = false, optional = true }
 
 [features]
 default = ["img"]
